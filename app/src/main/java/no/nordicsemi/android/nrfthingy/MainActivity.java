@@ -362,7 +362,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onMicrophoneValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte[] data) {
-
+            StringBuilder sb = new StringBuilder();
+            int count = 0;
+            String temp = "";
+            for (byte b : data) {
+                if (count == 0) {
+                    count = 1;
+                    temp = String.format("%02X", b);
+                }
+                else {
+                    count = 0;
+                    temp = temp + String.format("%02X,", b);
+                    sb.append(temp);
+                }
+            }
+            Log.d("Banter", sb.toString() + " dev id: " + bluetoothDevice.getAddress());
         }
     };
 
