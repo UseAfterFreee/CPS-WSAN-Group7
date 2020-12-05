@@ -206,14 +206,14 @@ public class ClhScan {
             //Log.i(LOG_TAG," manufacturer value"+ Arrays.toString(manufacturerData.valueAt(0)) );
 
             clhAdvData.parcelAdvData(manufacturerData,0);
-            if(mIsSink)
+            if(clhAdvData.getDestinationID() == mClhID)
             {//if this Cluster Head is the Sink node (ID=0), add data to waiting process list
                     mClhProcessData.addProcessPacketToBuffer(clhAdvData);
                     Log.i(LOG_TAG, "Add data to process list, len:" + mClhProcDataList.size());
             }
             else {//normal CLuster Head (ID 0..127) add data to advertising list to forward
                     mClhAdvertiser.addAdvPacketToBuffer(clhAdvData,false);
-                    Log.i(LOG_TAG, "Add data to advertised list, len:" + mClhAdvDataList.size());
+                    Log.i(LOG_TAG, "Add data to advertised list, hopCount:" + clhAdvData.getHopCounts() + " len:" + mClhAdvDataList.size());
                     Log.i(LOG_TAG, "Advertise list at " + (mClhAdvDataList.size() - 1) + ":"
                             + Arrays.toString(mClhAdvDataList.get(mClhAdvDataList.size() - 1).getParcelClhData()));
             }

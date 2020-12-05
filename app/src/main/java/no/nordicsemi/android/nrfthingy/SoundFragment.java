@@ -76,6 +76,7 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -248,6 +249,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     //audio receive event
                     if( mStartPlayingAudio = true)
                          mClhAdvertiser.addAdvSoundData(data);
+//                    mClhAdvertiser.addAdvSoundData();
                     //End PSG edit No.1
 
                 }
@@ -312,9 +314,38 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     ClhAdvertise mClhAdvertiser;
     ClhScan mClhScanner;
     ClhProcessData mClhProcessor;
+    private int recvCount = 0;
+    private byte currentAckNumber = 0;
 
-    //End PSG edit No.2----------------------------
+//End PSG edit No.2----------------------------
 
+    public ClhAdvertisedData createNewPacket(byte dest, byte soundPow, byte thingytype, byte thingyid)
+    {
+        ClhAdvertisedData ret = new ClhAdvertisedData();
+
+        ret.setSourceID(mClhID);
+        ret.setPacketID((byte) 1);
+        ret.setHopCount((byte) 0);
+        ret.setDestId(dest);
+        ret.setSoundPower(soundPow);
+        ret.setThingyDataType(thingytype);
+        ret.setThingyId(thingyid);
+        ret.setAckNumber(currentAckNumber);
+        currentAckNumber++;
+        ret.setIsAckPacket(false);
+
+        return ret;
+    }
+
+    public ClhAdvertisedData createAckPacket(ClhAdvertisedData packetToAck)
+    {
+        ClhAdvertisedData ret = new ClhAdvertisedData();
+        ret.setSourceID(packetToAck.getDestinationID());
+        ret.setDestId(packetToAck.getSourceID());
+        ret.setAckNumber(packetToAck.getAckNumber());
+        ret.setIsAckPacket(true);
+        return ret;
+    }
 
     @Nullable
     @Override
@@ -452,24 +483,36 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         mClhAdvertiser=mClh.getClhAdvertiser();
         mClhScanner=mClh.getClhScanner();
         mClhProcessor=mClh.getClhProcessor();
+        final int maxHopCount = 10;
 
         //timer 1000 ms for SINK to process receive data(display data to text box)
+
         final Handler handler=new Handler();
         handler. postDelayed(new Runnable() {
             @Override
             public void run() {
                 handler.postDelayed(this, 1000); //loop every cycle
-                if(mIsSink)
+
+                ArrayList<ClhAdvertisedData> procList = mClhProcessor.getProcessDataList();
+                for(int i=0; i<procList.size();i++)
                 {
-                    ArrayList<ClhAdvertisedData> procList=mClhProcessor.getProcessDataList();
-                    for(int i=0; i<procList.size();i++)
+                    if (!procList.get(0).isAckPacket())
                     {
-                        if(i==10) break; //just display 10 line in one cycle
-                        byte[] data=procList.get(0).getParcelClhData();
-                        mClhLog.append(Arrays.toString(data));
-                        mClhLog.append("\r\n");
-                        procList.remove(0);
+                        ClhAdvertisedData data = createAckPacket(procList.get(0));
+                        mClhAdvertiser.addAdvPacketToBuffer(data, true);
+
+                        recvCount++;
+                        Log.d("YEET", ""+recvCount);
+                        Log.d("YEET", "GOT NORMAL PACK");
                     }
+                    else
+                    {
+
+                        Log.d("YEET", "GOT ACK PACK");
+                    }
+
+
+                    procList.remove(0);
                 }
             }
         }, 1000); //the time you want to delay in milliseconds
@@ -508,24 +551,20 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     }
 
                     //ID=127, set dummy data include 100 elements for testing purpose
-                    if(mClhID==127) {
+                    if(mClhID==126) {
                         //mClhID = 1;
                         byte clhPacketID=1;
                         mClhThingySoundPower = 100;
-                        mClhData.setSourceID(mClhID);
-                        mClhData.setPacketID(clhPacketID);
-                        mClhData.setDestId(mClhDestID);
-                        mClhData.setHopCount(mClhHops);
-                        mClhData.setThingyId(mClhThingyID);
-                        mClhData.setThingyDataType(mClhThingyType);
-                        mClhData.setSoundPower(mClhThingySoundPower);
+                        mClhData = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID);
+
                         mClhAdvertiser.addAdvPacketToBuffer(mClhData,true);
-                        for (int i = 0; i < 100; i++) {
-                            ClhAdvertisedData clh = new ClhAdvertisedData();
-                            clh.Copy(mClhData);
+                        for (int i = 0; i < 20; i++) {
+                            ClhAdvertisedData clh = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID);
                             //Log.i(LOG_TAG, "Array old:" + Arrays.toString(clh.getParcelClhData()));
                             mClhThingySoundPower += 10;
+
                             clh.setSoundPower(mClhThingySoundPower);
+
                             mClhAdvertiser.addAdvPacketToBuffer(clh,true);
 
                             Log.i(LOG_TAG, "Add array:" + Arrays.toString(clh.getParcelClhData()));
@@ -573,8 +612,10 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     @Override
     public void onResume() {
         super.onResume();
-        ThingyListenerHelper.registerThingyListener(getContext(), mThingyListener, mDevice);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mAudioRecordBroadcastReceiver, createAudioRecordIntentFilter(mDevice.getAddress()));
+        if (mDevice != null) {
+            ThingyListenerHelper.registerThingyListener(getContext(), mThingyListener, mDevice);
+            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mAudioRecordBroadcastReceiver, createAudioRecordIntentFilter(mDevice.getAddress()));
+        }
     }
 
     @Override

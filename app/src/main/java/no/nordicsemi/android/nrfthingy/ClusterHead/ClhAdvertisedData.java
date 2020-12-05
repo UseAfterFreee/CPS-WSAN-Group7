@@ -3,7 +3,6 @@ package no.nordicsemi.android.nrfthingy.ClusterHead;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClhAdvertisedData   {
@@ -15,8 +14,10 @@ public class ClhAdvertisedData   {
     private static final int THINGY_DATA_TYPE_POS=5;
     private static final int SOUND_POWER_POSH=6;
     private static final int SOUND_POWER_POSL=7;
+    private static final int IS_ACK_PACKET=8;
+    private static final int ACK_NUMBER=9;
 
-    private static final int CLH_ARRAY_SIZE=SOUND_POWER_POSL+1;
+    private static final int CLH_ARRAY_SIZE=ACK_NUMBER+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];
 
 
@@ -84,6 +85,16 @@ public class ClhAdvertisedData   {
         ClhAdvData[THINGY_DATA_TYPE_POS] = (byte)(typeData & 0x00FF);
     }
 
+    public void setIsAckPacket(boolean isAck)
+    {
+        ClhAdvData[IS_ACK_PACKET] = isAck ? (byte)1 : (byte)0;
+    }
+
+    public void setAckNumber(byte num)
+    {
+        ClhAdvData[ACK_NUMBER] = num;
+    }
+
     public byte[] getParcelClhData()
     {
         return ClhAdvData;
@@ -115,6 +126,15 @@ public class ClhAdvertisedData   {
     public int getSoundPower()
     {
         return (ClhAdvData[SOUND_POWER_POSH]<<8)+((int)(ClhAdvData[SOUND_POWER_POSL])&0x00FF);
+    }
+    public boolean isAckPacket()
+    {
+        return ClhAdvData[IS_ACK_PACKET] == (byte)1;
+    }
+
+    public byte getAckNumber()
+    {
+        return ClhAdvData[ACK_NUMBER];
     }
 
 }

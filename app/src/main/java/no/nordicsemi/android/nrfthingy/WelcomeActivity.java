@@ -64,6 +64,7 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         SharedPreferences sp = getSharedPreferences(Utils.PREFS_INITIAL_SETUP, Context.MODE_PRIVATE);
+        sp.edit().putBoolean(Utils.INITIAL_CONFIG_STATE, true).apply();
         final boolean initialSetupStateComplete = sp.getBoolean(Utils.INITIAL_CONFIG_STATE, false);
         if (!initialSetupStateComplete) {
             setContentView(R.layout.activity_welcome);
