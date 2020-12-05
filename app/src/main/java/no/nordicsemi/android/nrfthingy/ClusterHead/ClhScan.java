@@ -11,9 +11,11 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Date;
 
 public class ClhScan {
     private BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -197,7 +199,10 @@ public class ClhScan {
             //history not yet full, update new "unique packet ID" to history list, reset life counter
             if(ClhScanHistoryArray.size()<ClhConst.SCAN_HISTORY_LIST_SIZE)
             {
-                ClhScanHistoryArray.append(manufacturerData.keyAt(0),0);
+                long epoch = new Date().getTime();
+                // magic constant
+                epoch = (epoch - 1607186897000L) / 1000;
+                ClhScanHistoryArray.append(manufacturerData.keyAt(0), (int)epoch);
             }
             ClhAdvertisedData clhAdvData = new ClhAdvertisedData();
 
@@ -216,6 +221,19 @@ public class ClhScan {
                     Log.i(LOG_TAG, "Add data to advertised list, hopCount:" + clhAdvData.getHopCounts() + " len:" + mClhAdvDataList.size());
                     Log.i(LOG_TAG, "Advertise list at " + (mClhAdvDataList.size() - 1) + ":"
                             + Arrays.toString(mClhAdvDataList.get(mClhAdvDataList.size() - 1).getParcelClhData()));
+            }
+        }
+        else
+        {
+            int val = ClhScanHistoryArray.get(manufacturerData.keyAt(0));
+
+            long epoch = new Date().getTime();
+            // magic constant
+            epoch = (epoch - 1607186897000L) / 1000;
+
+            if (epoch - val > 12.5)
+            {
+                ClhScanHistoryArray.remove(manufacturerData.keyAt(0));
             }
         }
     }

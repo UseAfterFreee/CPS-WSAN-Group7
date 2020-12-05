@@ -316,6 +316,9 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     ClhProcessData mClhProcessor;
     private int recvCount = 0;
     private byte currentAckNumber = 0;
+    private ArrayList<Byte> ackedNumbers = new ArrayList<Byte>();
+    private ArrayList<Byte> receivedPackets = new ArrayList<Byte>();
+
 
 //End PSG edit No.2----------------------------
 
@@ -331,8 +334,23 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         ret.setThingyDataType(thingytype);
         ret.setThingyId(thingyid);
         ret.setAckNumber(currentAckNumber);
-        currentAckNumber++;
         ret.setIsAckPacket(false);
+
+        final ClhAdvertisedData copyOfPacket = ret;
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (ackedNumbers.contains(copyOfPacket.getAckNumber())) return;
+
+                Log.d("YEET", "RETRANSMIT " + copyOfPacket.getAckNumber());
+                mClhAdvertiser.addAdvPacketToBuffer(copyOfPacket, true);
+                handler.postDelayed(this, 5000);
+            }
+        }, 5000);
+
+        currentAckNumber++;
 
         return ret;
     }
@@ -501,14 +519,18 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                         ClhAdvertisedData data = createAckPacket(procList.get(0));
                         mClhAdvertiser.addAdvPacketToBuffer(data, true);
 
-                        recvCount++;
-                        Log.d("YEET", ""+recvCount);
-                        Log.d("YEET", "GOT NORMAL PACK");
+                        if (!receivedPackets.contains(procList.get(0).getAckNumber())) {
+                            // CODE COMES HERE YOU IDIOTSSSS
+                            receivedPackets.add(procList.get(0).getAckNumber());
+                            recvCount++;
+                            Log.d("YEET", "" + recvCount);
+                            Log.d("YEET", "GOT NORMAL PACK " + procList.get(0).getAckNumber());
+                        }
                     }
                     else
                     {
-
-                        Log.d("YEET", "GOT ACK PACK");
+                        ackedNumbers.add(procList.get(0).getAckNumber());
+                        Log.d("YEET", "GOT ACK PACK" + procList.get(0).getAckNumber());
                     }
 
 
@@ -558,7 +580,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                         mClhData = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID);
 
                         mClhAdvertiser.addAdvPacketToBuffer(mClhData,true);
-                        for (int i = 0; i < 20; i++) {
+                        for (int i = 0; i < 10; i++) {
                             ClhAdvertisedData clh = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID);
                             //Log.i(LOG_TAG, "Array old:" + Arrays.toString(clh.getParcelClhData()));
                             mClhThingySoundPower += 10;
