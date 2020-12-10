@@ -171,7 +171,7 @@ public class ClhAdvertise {
     //------------------------
     // advertising next data in the waiting list
     public void nextAdvertisingPacket(){
-
+//        Log.d("NEXTADV", "nextAdvertisingPacket");
         if (mClhAdvDataList.size()>0)
         {//list not empty, advertise item 0 in the list
             byte[] mAdvData = mClhAdvDataList.get(0).getParcelClhData();

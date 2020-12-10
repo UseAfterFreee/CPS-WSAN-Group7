@@ -16,8 +16,11 @@ public class ClhAdvertisedData   {
     private static final int SOUND_POWER_POSL=7;
     private static final int IS_ACK_PACKET=8;
     private static final int ACK_NUMBER=9;
+    private static final int PACKET_TYPE=10;
+    private static final int DATA0=11;
+    private static final int DATA1=12;
 
-    private static final int CLH_ARRAY_SIZE=ACK_NUMBER+1;
+    private static final int CLH_ARRAY_SIZE=DATA1+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];
 
 
@@ -41,6 +44,7 @@ public class ClhAdvertisedData   {
         if (manufacturerData.valueAt(index)!=null) {
             System.arraycopy(manufacturerData.valueAt(index), 0,ClhAdvData,PACKET_CLH_ID_POS + 1, manufacturerData.valueAt(index).length);
         }
+//        Log.d("RECVDATASPEC", manufacturerData.valueAt(index)[ACK_NUMBER] +"");
         /*ClhAdvData[DEST_CLH_ID_POS]=manufacturerData.valueAt(index)[0];
         ClhAdvData[HOP_COUNT_POS]=manufacturerData.valueAt(index)[1];
         ClhAdvData[THINGY_ID_POS]=manufacturerData.valueAt(index)[2];
@@ -94,6 +98,20 @@ public class ClhAdvertisedData   {
     {
         ClhAdvData[ACK_NUMBER] = num;
     }
+    public void setPacketType(byte type)
+    {
+        ClhAdvData[PACKET_TYPE] = type;
+    }
+
+    public void setData0(byte data0)
+    {
+        ClhAdvData[DATA0] = data0;
+    }
+
+    public void setData1(byte data1)
+    {
+        ClhAdvData[DATA1] = data1;
+    }
 
     public byte[] getParcelClhData()
     {
@@ -135,6 +153,20 @@ public class ClhAdvertisedData   {
     public byte getAckNumber()
     {
         return ClhAdvData[ACK_NUMBER];
+    }
+    public byte getPacketType()
+    {
+        return ClhAdvData[PACKET_TYPE];
+    }
+
+    public byte getData0()
+    {
+        return ClhAdvData[DATA0];
+    }
+
+    public byte getData1()
+    {
+        return ClhAdvData[DATA1];
     }
 
 }

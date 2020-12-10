@@ -211,6 +211,7 @@ public class ClhScan {
             //Log.i(LOG_TAG," manufacturer value"+ Arrays.toString(manufacturerData.valueAt(0)) );
 
             clhAdvData.parcelAdvData(manufacturerData,0);
+            Log.d("RECVDATA", Arrays.toString(clhAdvData.getParcelClhData()));
             if(clhAdvData.getDestinationID() == mClhID)
             {//if this Cluster Head is the Sink node (ID=0), add data to waiting process list
                     mClhProcessData.addProcessPacketToBuffer(clhAdvData);
