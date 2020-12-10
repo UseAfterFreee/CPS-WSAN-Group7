@@ -6,19 +6,19 @@ import android.util.SparseArray;
 import java.util.Arrays;
 
 public class ClhAdvertisedData   {
-    private static final int SOURCE_CLH_ID_POS=0;
-    private static final int PACKET_CLH_ID_POS=1;
-    private static final int DEST_CLH_ID_POS=2;
-    private static final int HOP_COUNT_POS=3;
-    private static final int THINGY_ID_POS=4;
-    private static final int THINGY_DATA_TYPE_POS=5;
-    private static final int SOUND_POWER_POSH=6;
-    private static final int SOUND_POWER_POSL=7;
-    private static final int IS_ACK_PACKET=8;
-    private static final int ACK_NUMBER=9;
-    private static final int PACKET_TYPE=10;
-    private static final int DATA0=11;
-    private static final int DATA1=12;
+    private static final int SOURCE_CLH_ID_POS=0;    // NO
+    private static final int PACKET_CLH_ID_POS=1;    // NO
+    private static final int DEST_CLH_ID_POS=2;      // NO
+    private static final int HOP_COUNT_POS=3;        // NO
+    private static final int THINGY_ID_POS=4;        // YES
+    private static final int THINGY_DATA_TYPE_POS=5; // YES
+    private static final int SOUND_POWER_POSH=6;     // YES
+    private static final int SOUND_POWER_POSL=7;     // YES
+    private static final int IS_ACK_PACKET=8;        // NO
+    private static final int ACK_NUMBER=9;           // NO
+    private static final int PACKET_TYPE=10;         // ?
+    private static final int DATA0=11;               // ?
+    private static final int DATA1=12;               // ?
 
     private static final int CLH_ARRAY_SIZE=DATA1+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];

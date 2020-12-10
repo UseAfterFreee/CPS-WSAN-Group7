@@ -270,20 +270,20 @@ public class ClhAdvertise {
         Log.i(LOG_TAG,"Start Start Advertizer func");
 
         AdvertiseSettings.Builder advSettingsBuilder = new AdvertiseSettings.Builder()
-                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_LOW)
+                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .setConnectable(false);
-        //set operation mode: low energy to latency
-        switch (settings[ADV_SETTING_BYTE_MODE]) {
-            case ADV_SETTING_MODE_LOWLATENCY:
-                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
-                break;
-            case ADV_SETTING_MODE_BALANCE:
-                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
-                break;
-            default:
-                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
-                break;
-        }
+//        //set operation mode: low energy to latency
+//        switch (settings[ADV_SETTING_BYTE_MODE]) {
+//            case ADV_SETTING_MODE_LOWLATENCY:
+//                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
+//                break;
+//            case ADV_SETTING_MODE_BALANCE:
+//                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
+//                break;
+//            default:
+//                advSettingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER);
+//                break;
+//        }
         AdvertiseSettings advSettings = advSettingsBuilder.build();
 
         //enable/disable send device name and txpower
@@ -403,7 +403,7 @@ public class ClhAdvertise {
 
         if(settings==null)
         {   // default advertising: low power, name and UUID , no TX power
-            mAdvsettings[ADV_SETTING_BYTE_MODE] = ADV_SETTING_MODE_LOWPOWER;
+            mAdvsettings[ADV_SETTING_BYTE_MODE] = ADV_SETTING_MODE_LOWLATENCY;
             mAdvsettings[ADV_SETTING_BYTE_SENDNAME] = ADV_SETTING_SENDNAME_YES;
             mAdvsettings[ADV_SETTING_BYTE_SENDTXPOWER] = ADV_SETTING_SENDTXPOWER_NO;
 
