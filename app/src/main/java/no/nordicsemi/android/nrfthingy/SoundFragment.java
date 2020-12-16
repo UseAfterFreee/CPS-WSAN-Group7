@@ -562,6 +562,25 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                                     firstRSSICycle = cycles;
                                 }
                             }
+                            if (procList.get(0).getPacketType() == 1 && mClhID != 0) // Is a connect list
+                            {
+                                final int[] RSSIIDlocation = new int[]{11, 4, 6, 13, 15, 17, 19};
+                                final int[] RSSIPowerlocation = new int[]{12, 5, 7, 14, 16, 18, 20};
+                                for (int ii = 0; ii < 7; ++ii)
+                                {
+                                    int RSSI = procList.get(0).getData(RSSIPowerlocation[ii]);
+                                    int ID = procList.get(0).getData(RSSIIDlocation[ii]);
+                                    if (RSSI == -1 && ID != 0)
+                                    {
+                                        // TODO: PETER CONNECT TO THINGY WITH ID ID.
+                                        Log.d("YEET", "HAS TO CONNECT TO: " + ID);
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
 
                             receivedPackets.add(procList.get(0).getAckNumber());
                             if (receivedPackets.size() > 100)
@@ -594,14 +613,20 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     Log.d("YEET", "DIVIDING!");
                     for (String key: thingyDiv.keySet())
                     {
+                        boolean isFirst = true;
+                        ClhAdvertisedData newPack = createNewPacket(Byte.parseByte(key), (byte) 0, (byte) 0, (byte) 0, (byte) 1, (byte) 0, (byte) 0); // Initial invalid packet
                         for (String thingyId: (HashSet<String>)thingyDiv.get(key))
                         {
                             //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
-                            //TODO make 1 packet
-                            ClhAdvertisedData newPack = createNewPacket(Byte.parseByte(key), (byte)0, (byte)0, (byte)0, (byte)1, Byte.parseByte(thingyId), (byte)0);
-                            startTransmit(newPack);
-                            mClhAdvertiser.addAdvPacketToBuffer(newPack, true);
+                            if (isFirst) {
+                                newPack = createNewPacket(Byte.parseByte(key), (byte) 0, (byte) 0, (byte) 0, (byte) 1, Byte.parseByte(thingyId), (byte) -1); // really initialize the packet
+                                isFirst = false;
+                                continue;
+                            }
+                            newPack.setNewRSSI(Byte.parseByte(thingyId), (byte) -1);
                         }
+                        startTransmit(newPack);
+                        mClhAdvertiser.addAdvPacketToBuffer(newPack, true);
                     }
                 }
                 cycles++;
@@ -657,6 +682,8 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 //                        ClhAdvertisedData data2 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)53, (byte)-43);
                         data0.setNewRSSI((byte)3, (byte)-56);
                         data0.setNewRSSI((byte)53, (byte)-43);
+                        // TODO: YORAN CODE HERE TO INSERT PROPER ID AND RSSI :)
+                        // TODO: OF ERGENS ANDERS ZIE JE MIJ BOEIEN
                         startTransmit(data0);
 
                         mClhAdvertiser.addAdvPacketToBuffer(data0,true);
