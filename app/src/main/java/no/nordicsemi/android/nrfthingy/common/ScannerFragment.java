@@ -50,6 +50,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -68,6 +70,7 @@ import no.nordicsemi.android.support.v18.scanner.ScanCallback;
 import no.nordicsemi.android.support.v18.scanner.ScanFilter;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 import no.nordicsemi.android.support.v18.scanner.ScanSettings;
+import no.nordicsemi.android.thingylib.utils.ThingyUtils;
 
 /**
  * ScannerFragment class scan required BLE devices and shows them in a list. This class scans and filter devices with given BLE Service UUID which may be null. It contains a
@@ -190,6 +193,10 @@ public class ScannerFragment extends DialogFragment {
      * using class ScannerServiceParser
      */
     private void startScan() {
+        Log.d("scanner", "STARTING SCAN");
+
+        mUuid = ParcelUuid.fromString(ThingyUtils.THINGY_BASE_UUID.toString());
+
         // Since Android 6.0 we need to obtain either Manifest.permission.ACCESS_FINE_LOCATION or Manifest.permission.ACCESS_FINE_LOCATION to be able to scan for
         // Bluetooth LE devices. This is related to beacons as proximity devices.
         // On API older than Marshmallow the following code does nothing.
@@ -245,12 +252,20 @@ public class ScannerFragment extends DialogFragment {
             // do nothing
         }
 
+        List<String> knownMAC = new ArrayList<String>();
+
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
             if (results.size() > 0 && troubleshootView.getVisibility() == View.VISIBLE) {
                 troubleshootView.setVisibility(View.GONE);
             }
             mAdapter.update(results);
+            for (int i = 0; i < results.size(); i++) {
+                if(!knownMAC.contains(results.get(i).getDevice().getAddress())) {
+                    knownMAC.add(results.get(i).getDevice().getAddress());
+                    Log.d("scanner", "Found a thingy, MAC = " + results.get(i).getDevice().getAddress() + " with RSSI:" + results.get(i).getRssi());
+                }
+            }
         }
 
         @Override

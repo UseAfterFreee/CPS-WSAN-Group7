@@ -86,7 +86,7 @@ public class DeviceListAdapter extends BaseAdapter {
         return null;
     }
 
-    void clearDevices() {
+    public void clearDevices() {
         mDevices.clear();
         notifyDataSetChanged();
     }

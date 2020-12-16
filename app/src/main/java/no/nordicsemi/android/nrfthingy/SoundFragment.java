@@ -61,6 +61,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.ParcelUuid;
 import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -70,6 +71,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +80,7 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhAdvertise;
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhAdvertisedData;
@@ -85,6 +88,7 @@ import no.nordicsemi.android.nrfthingy.ClusterHead.ClhConst;
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhProcessData;
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhScan;
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClusterHead;
+import no.nordicsemi.android.nrfthingy.common.DeviceListAdapter;
 import no.nordicsemi.android.nrfthingy.common.MessageDialogFragment;
 import no.nordicsemi.android.nrfthingy.common.PermissionRationaleDialogFragment;
 import no.nordicsemi.android.nrfthingy.common.Utils;
@@ -93,6 +97,11 @@ import no.nordicsemi.android.nrfthingy.sound.PcmModeFragment;
 import no.nordicsemi.android.nrfthingy.sound.SampleModeFragment;
 import no.nordicsemi.android.nrfthingy.sound.ThingyMicrophoneService;
 import no.nordicsemi.android.nrfthingy.widgets.VoiceVisualizer;
+import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
+import no.nordicsemi.android.support.v18.scanner.ScanCallback;
+import no.nordicsemi.android.support.v18.scanner.ScanFilter;
+import no.nordicsemi.android.support.v18.scanner.ScanResult;
+import no.nordicsemi.android.support.v18.scanner.ScanSettings;
 import no.nordicsemi.android.thingylib.ThingyListener;
 import no.nordicsemi.android.thingylib.ThingyListenerHelper;
 import no.nordicsemi.android.thingylib.ThingySdkManager;
@@ -474,7 +483,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
             }
         }, 1000); //the time you want to delay in milliseconds
 
-        //"Start" button Click Hander
+        //"Start" button Click Handler
         // get Cluster Head ID (0-127) in text box to initialize advertiser
         //Then Start advertising
         //ID=0: Sink
@@ -490,8 +499,11 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     mAdvertiseButton.setText("Stop");
                     mClhIDInput.setEnabled(false);
 
+                    startScan();
+
                     mClh.clearClhAdvList(); //empty list before starting
 
+                    //startScan();
                     //check input text must in rang 0..127
                     String strEnteredVal = mClhIDInput.getText().toString();
                     if ((strEnteredVal.compareTo("") == 0) || (strEnteredVal == null)) {
@@ -550,6 +562,98 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         return rootView;
     }
+
+    //-------------------------------------------------------BEGIN YORAN ZIJN TROEP-------------------------------------------------------
+    private final static String TAGY = "Scanner";
+
+    private final static long SCAN_DURATION = 8000;
+    /* package */static final int NO_RSSI = -1000;
+
+    private final static int REQUEST_PERMISSION_REQ_CODE = 76; // any 8-bit number
+
+    private LinearLayout troubleshootView;
+    private DeviceListAdapter mAdapter;
+    private Handler mHandler = new Handler();
+
+    private ParcelUuid mUuid;
+    private boolean mIsScanning = false;
+
+    // LIST WITH ALL KNOWN THINGY'S
+    List<String> knownMAC = new ArrayList<String>();
+
+    private void startScan() {
+        Log.d(TAGY, "Starting Scan");
+
+        // Set mUuid to the one from the Thingy's
+        mUuid = ParcelUuid.fromString(ThingyUtils.THINGY_BASE_UUID.toString());
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                return;
+            }
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
+            return;
+        }
+
+        mAdapter.clearDevices();
+        troubleshootView.setVisibility(View.VISIBLE);
+
+        final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+        final ScanSettings settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(750).setUseHardwareBatchingIfSupported(false).setUseHardwareFilteringIfSupported(false).build();
+        final List<ScanFilter> filters = new ArrayList<>();
+        filters.add(new ScanFilter.Builder().setServiceUuid(mUuid).build());
+        scanner.startScan(filters, settings, scanCallback);
+
+        mIsScanning = true;
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mIsScanning) {
+                    stopScan();
+                }
+            }
+        }, SCAN_DURATION);
+    }
+
+
+    private void stopScan() {
+        if (mIsScanning) {
+            final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
+            scanner.stopScan(scanCallback);
+            mIsScanning = false;
+        }
+    }
+
+
+    private ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(final int callbackType, @NonNull final ScanResult result) {
+            // do nothing
+        }
+
+        @Override
+        public void onBatchScanResults(final List<ScanResult> results) {
+            if (results.size() > 0 && troubleshootView.getVisibility() == View.VISIBLE) {
+                troubleshootView.setVisibility(View.GONE);
+            }
+            mAdapter.update(results);
+            for (int i = 0; i < results.size(); i++) {
+                if(!knownMAC.contains(results.get(i).getDevice().getAddress())) {
+                    knownMAC.add(results.get(i).getDevice().getAddress());
+                    Log.d("scanner", "Found a thingy, MAC = " + results.get(i).getDevice().getAddress() + " with RSSI:" + results.get(i).getRssi());
+                }
+            }
+        }
+
+        @Override
+        public void onScanFailed(final int errorCode) {
+            // should never be called
+        }
+    };
+    //-------------------------------------------------------EIND YORAN ZIJN TROEP-------------------------------------------------------
+    //------------------------------------YORAN ZIJN TROEP IS MEDEMOGELIJK GEMAAKT DOOR PERVASIVE SYSTEEM--------------------------------
 
     private void sendAudiRecordingBroadcast() {
         Intent startAudioRecording = new Intent(getActivity(), ThingyMicrophoneService.class);
