@@ -535,7 +535,22 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                             // CODE COMES HERE YOU IDIOTSSSS
                             if (procList.get(0).getPacketType() == 0 && mClhID == 0) // Is thingy distpacket and we are sink
                             {
-                                helperClass.insertRSSI(procList.get(0).getSourceID()+"", procList.get(0).getData0() + "", (int) procList.get(0).getData1());
+                                final int[] RSSIIDlocation = new int[]{11, 4, 6, 13, 15, 17, 19};
+                                final int[] RSSIPowerlocation = new int[]{12, 5, 7, 14, 16, 18, 20};
+                                for (int ii = 0; ii < 7; ++ii)
+                                {
+                                    int RSSI = procList.get(0).getData(RSSIPowerlocation[ii]);
+                                    int ID = procList.get(0).getData(RSSIIDlocation[ii]);
+                                    if (RSSI != 0 && ID != 0)
+                                    {
+                                        helperClass.insertRSSI(procList.get(0).getSourceID()+"", ID+"", RSSI);
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                //helperClass.insertRSSI(procList.get(0).getSourceID()+"", procList.get(0).getData0() + "", (int) procList.get(0).getData1());
                                 Log.d("YEET", "helperClass.insertRSSI("+procList.get(0).getSourceID()+","+procList.get(0).getData0()+","+procList.get(0).getData1()+");");
                                 if (firstRSSICycle == 0)
                                 {
