@@ -346,6 +346,12 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         ret.setData0(data0);
         ret.setData1(data1);
 
+
+        return ret;
+    }
+
+    public void startTransmit(ClhAdvertisedData ret)
+    {
         final ClhAdvertisedData copyOfPacket = ret;
 
         final Handler handler = new Handler();
@@ -363,7 +369,6 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         currentAckNumber++;
 
-        return ret;
     }
 
     public ClhAdvertisedData createAckPacket(ClhAdvertisedData packetToAck)
@@ -592,7 +597,9 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                         for (String thingyId: (HashSet<String>)thingyDiv.get(key))
                         {
                             //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
+                            //TODO make 1 packet
                             ClhAdvertisedData newPack = createNewPacket(Byte.parseByte(key), (byte)0, (byte)0, (byte)0, (byte)1, Byte.parseByte(thingyId), (byte)0);
+                            startTransmit(newPack);
                             mClhAdvertiser.addAdvPacketToBuffer(newPack, true);
                         }
                     }
@@ -646,12 +653,15 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
                          */
                         ClhAdvertisedData data0 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)25, (byte)-65);
-                        ClhAdvertisedData data1 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)3, (byte)-56);
-                        ClhAdvertisedData data2 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)53, (byte)-43);
+//                        ClhAdvertisedData data1 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)3, (byte)-56);
+//                        ClhAdvertisedData data2 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)53, (byte)-43);
+                        data0.setNewRSSI((byte)3, (byte)-56);
+                        data0.setNewRSSI((byte)53, (byte)-43);
+                        startTransmit(data0);
 
                         mClhAdvertiser.addAdvPacketToBuffer(data0,true);
-                        mClhAdvertiser.addAdvPacketToBuffer(data1,true);
-                        mClhAdvertiser.addAdvPacketToBuffer(data2,true);
+//                        mClhAdvertiser.addAdvPacketToBuffer(data1,true);
+//                        mClhAdvertiser.addAdvPacketToBuffer(data2,true);
                       }
 
                     mClhAdvertiser.nextAdvertisingPacket(); //start advertising

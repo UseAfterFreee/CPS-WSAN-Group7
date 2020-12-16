@@ -36,6 +36,12 @@ public class ClhAdvertisedData   {
     private static final int CLH_ARRAY_SIZE=DATA9+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];
 
+    public ClhAdvertisedData()
+    {
+        for (int i = 0; i < 21; ++i) {
+            ClhAdvData[i] = 0;
+        }
+    }
 
     public  void Copy(ClhAdvertisedData newObj) {
         byte[] clhdata=newObj.getParcelClhData();
