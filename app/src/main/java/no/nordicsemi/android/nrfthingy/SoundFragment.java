@@ -78,7 +78,6 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -685,8 +684,12 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     private ParcelUuid mUuid;
     private boolean mIsScanning = false;
 
+
     // LIST WITH ALL KNOWN THINGY'S
-    List<String> knownMAC = new ArrayList<String>();
+    List<ThingyBLDev> knownThingys = new ArrayList<ThingyBLDev>();
+    private boolean thingyListAvailable = false;
+    ThingyBLDev thingyBuf = new ThingyBLDev();
+
 
     private void onCreateScanner() {
         mAdapter = new DeviceListAdapter();
@@ -731,11 +734,23 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
     private void stopScan() {
         Log.d(TAGY, "Stopping Scan");
+        thingyListAvailable = true;
         if (mIsScanning) {
             final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
             scanner.stopScan(scanCallback);
             mIsScanning = false;
         }
+        if(!knownThingys.isEmpty()) {
+            Log.d("scanner", "Found  following thingy's: ");
+            for(int i = 0; i < knownThingys.size(); i++) {
+                Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).bluetoothDevice.getName() +
+                        "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
+            }
+        }
+        else {
+            Log.d("scanner", "Found no thingy's");
+        }
+
     }
 
 
@@ -747,14 +762,13 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
-            if (results.size() > 0 && troubleshootView.getVisibility() == View.VISIBLE) {
-                troubleshootView.setVisibility(View.GONE);
-            }
+
             mAdapter.update(results);
             for (int i = 0; i < results.size(); i++) {
-                if(!knownMAC.contains(results.get(i).getDevice().getAddress())) {
-                    knownMAC.add(results.get(i).getDevice().getAddress());
-                    Log.d("scanner", "Found a thingy, MAC = " + results.get(i).getDevice().getAddress() + " with RSSI:" + results.get(i).getRssi());
+                thingyBuf.bluetoothDevice = results.get(i).getDevice();
+                thingyBuf.rssi = results.get(i).getRssi();
+                if(!knownThingys.contains(thingyBuf)) {
+                    knownThingys.add(thingyBuf);
                 }
             }
         }
@@ -766,6 +780,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     };
     //-------------------------------------------------------EIND YORAN ZIJN TROEP-------------------------------------------------------
     //------------------------------------YORAN ZIJN TROEP IS MEDEMOGELIJK GEMAAKT DOOR PERVASIVE SYSTEEM--------------------------------
+
 
     private void sendAudiRecordingBroadcast() {
         Intent startAudioRecording = new Intent(getActivity(), ThingyMicrophoneService.class);
@@ -1006,3 +1021,5 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         }
     }
 }
+
+;
