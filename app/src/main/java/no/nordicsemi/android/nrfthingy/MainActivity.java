@@ -402,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mThingySdkManager = ThingySdkManager.getInstance();
         mDatabaseHelper = new DatabaseHelper(this);
+//        mDatabaseHelper.insertDevice("aaaa", "aaaa");
 
         mLocationServicesContainer = findViewById(R.id.location_services_container);
         mNoThingyConnectedContainer = findViewById(R.id.no_thingy_connected);

@@ -212,7 +212,8 @@ public class PcmModeFragment extends Fragment implements PermissionRationaleDial
             final int selectedAudioTrackPosition = ((ThingyService.ThingyBinder) (mThingySdkManager.getThingyBinder())).getLastSelectedAudioTrack(mDevice);
             mAudioFileAdapter.setSelectedItemPosition(selectedAudioTrackPosition);
         }
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mConnectionBroadcastReceiver, ThingyUtils.createSpeakerStatusChangeReceiver(mDevice.getAddress()));
+        if (mDevice != null)
+        {        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mConnectionBroadcastReceiver, ThingyUtils.createSpeakerStatusChangeReceiver(mDevice.getAddress()));}
         return rootView;
     }
 

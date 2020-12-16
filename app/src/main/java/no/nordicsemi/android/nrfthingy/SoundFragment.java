@@ -34,7 +34,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 package no.nordicsemi.android.nrfthingy;
 
@@ -78,9 +78,12 @@ import android.widget.Toast;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhAdvertise;
 import no.nordicsemi.android.nrfthingy.ClusterHead.ClhAdvertisedData;
@@ -106,6 +109,7 @@ import no.nordicsemi.android.thingylib.ThingyListener;
 import no.nordicsemi.android.thingylib.ThingyListenerHelper;
 import no.nordicsemi.android.thingylib.ThingySdkManager;
 import no.nordicsemi.android.thingylib.utils.ThingyUtils;
+import no.nordicsemi.android.nrfthingy.HelperClass;
 
 public class SoundFragment extends Fragment implements PermissionRationaleDialogFragment.PermissionDialogListener {
 
@@ -257,6 +261,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     //audio receive event
                     if( mStartPlayingAudio = true)
                          mClhAdvertiser.addAdvSoundData(data);
+//                    mClhAdvertiser.addAdvSoundData();
                     //End PSG edit No.1
 
                 }
@@ -321,9 +326,64 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     ClhAdvertise mClhAdvertiser;
     ClhScan mClhScanner;
     ClhProcessData mClhProcessor;
+    private int recvCount = 0;
+    private byte currentAckNumber = 0;
+    private ArrayList<Byte> ackedNumbers = new ArrayList<Byte>();
+    private ArrayList<Byte> receivedPackets = new ArrayList<Byte>();
+    private HelperClass helperClass = new HelperClass();
+    private int cycles = 0;
+    private int firstRSSICycle = 0;
 
-    //End PSG edit No.2----------------------------
 
+
+//End PSG edit No.2----------------------------
+
+    public ClhAdvertisedData createNewPacket(byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1)
+    {
+        ClhAdvertisedData ret = new ClhAdvertisedData();
+
+        ret.setSourceID(mClhID);
+        ret.setPacketID((byte) 1);
+        ret.setHopCount((byte) 0);
+        ret.setDestId(dest);
+        ret.setSoundPower(soundPow);
+        ret.setThingyDataType(thingytype);
+        ret.setThingyId(thingyid);
+        ret.setAckNumber(currentAckNumber);
+        ret.setIsAckPacket(false);
+        ret.setPacketType(packetType);
+        ret.setData0(data0);
+        ret.setData1(data1);
+
+        final ClhAdvertisedData copyOfPacket = ret;
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (ackedNumbers.contains(copyOfPacket.getAckNumber())) return;
+                handler.postDelayed(this, 5000);
+
+                if (mClhAdvertiser.getAdvertiseList().size() > 10) return; // To prevent filling up the buffer too quickly with only retransmissions
+                Log.d("YEET", "RETRANSMIT " + copyOfPacket.getAckNumber());
+                mClhAdvertiser.addAdvPacketToBuffer(copyOfPacket, true);
+            }
+        }, 5000);
+
+        currentAckNumber++;
+
+        return ret;
+    }
+
+    public ClhAdvertisedData createAckPacket(ClhAdvertisedData packetToAck)
+    {
+        ClhAdvertisedData ret = new ClhAdvertisedData();
+        ret.setSourceID(packetToAck.getDestinationID());
+        ret.setDestId(packetToAck.getSourceID());
+        ret.setAckNumber(packetToAck.getAckNumber());
+        ret.setIsAckPacket(true);
+        return ret;
+    }
 
     @Nullable
     @Override
@@ -461,25 +521,77 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         mClhAdvertiser=mClh.getClhAdvertiser();
         mClhScanner=mClh.getClhScanner();
         mClhProcessor=mClh.getClhProcessor();
+        final int maxHopCount = 10;
 
         //timer 1000 ms for SINK to process receive data(display data to text box)
+
         final Handler handler=new Handler();
         handler. postDelayed(new Runnable() {
             @Override
             public void run() {
                 handler.postDelayed(this, 1000); //loop every cycle
-                if(mIsSink)
+
+                ArrayList<ClhAdvertisedData> procList = mClhProcessor.getProcessDataList();
+                for(int i=0; i<procList.size();i++)
                 {
-                    ArrayList<ClhAdvertisedData> procList=mClhProcessor.getProcessDataList();
-                    for(int i=0; i<procList.size();i++)
+                    if (!procList.get(0).isAckPacket())
                     {
-                        if(i==10) break; //just display 10 line in one cycle
-                        byte[] data=procList.get(0).getParcelClhData();
-                        mClhLog.append(Arrays.toString(data));
-                        mClhLog.append("\r\n");
-                        procList.remove(0);
+                        ClhAdvertisedData data = createAckPacket(procList.get(0));
+                        mClhAdvertiser.addAdvPacketToBuffer(data, true);
+                        mClhAdvertiser.nextAdvertisingPacket(); //start advertising
+
+                        if (!receivedPackets.contains(procList.get(0).getAckNumber())) {
+                            // CODE COMES HERE YOU IDIOTSSSS
+                            if (procList.get(0).getPacketType() == 0 && mClhID == 0) // Is thingy distpacket and we are sink
+                            {
+                                helperClass.insertRSSI(procList.get(0).getSourceID()+"", procList.get(0).getData0() + "", (int) procList.get(0).getData1());
+                                Log.d("YEET", "helperClass.insertRSSI("+procList.get(0).getSourceID()+","+procList.get(0).getData0()+","+procList.get(0).getData1()+");");
+                                if (firstRSSICycle == 0)
+                                {
+                                    firstRSSICycle = cycles;
+                                }
+                            }
+
+                            receivedPackets.add(procList.get(0).getAckNumber());
+                            if (receivedPackets.size() > 100)
+                            {
+                                receivedPackets.remove(0);
+                            }
+                            recvCount++;
+                            Log.d("YEET", "" + recvCount);
+                            Log.d("YEET", "GOT NORMAL PACK " + procList.get(0).getAckNumber());
+                        }
+                    }
+                    else
+                    {
+
+                        ackedNumbers.add(procList.get(0).getAckNumber());
+                        if (ackedNumbers.size() > 100)
+                        {
+                            ackedNumbers.remove(0);
+                        }
+                        Log.d("YEET", "GOT ACK PACK" + Arrays.toString(procList.get(0).getParcelClhData()));
+                        Log.d("YEET", "GOT ACK PACK" + procList.get(0).getAckNumber());
+                    }
+
+
+                    procList.remove(0);
+                }
+                if (firstRSSICycle != 0 && cycles - firstRSSICycle == 120)
+                {
+                    HashMap<String, HashSet> thingyDiv = helperClass.getThingyDivision();
+                    Log.d("YEET", "DIVIDING!");
+                    for (String key: thingyDiv.keySet())
+                    {
+                        for (String thingyId: (HashSet<String>)thingyDiv.get(key))
+                        {
+                            //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
+                            ClhAdvertisedData newPack = createNewPacket(Byte.parseByte(key), (byte)0, (byte)0, (byte)0, (byte)1, Byte.parseByte(thingyId), (byte)0);
+                            mClhAdvertiser.addAdvPacketToBuffer(newPack, true);
+                        }
                     }
                 }
+                cycles++;
             }
         }, 1000); //the time you want to delay in milliseconds
 
@@ -520,29 +632,23 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     }
 
                     //ID=127, set dummy data include 100 elements for testing purpose
-                    if(mClhID==127) {
+                    if(mClhID==126) {
                         //mClhID = 1;
                         byte clhPacketID=1;
                         mClhThingySoundPower = 100;
-                        mClhData.setSourceID(mClhID);
-                        mClhData.setPacketID(clhPacketID);
-                        mClhData.setDestId(mClhDestID);
-                        mClhData.setHopCount(mClhHops);
-                        mClhData.setThingyId(mClhThingyID);
-                        mClhData.setThingyDataType(mClhThingyType);
-                        mClhData.setSoundPower(mClhThingySoundPower);
-                        mClhAdvertiser.addAdvPacketToBuffer(mClhData,true);
-                        for (int i = 0; i < 100; i++) {
-                            ClhAdvertisedData clh = new ClhAdvertisedData();
-                            clh.Copy(mClhData);
-                            //Log.i(LOG_TAG, "Array old:" + Arrays.toString(clh.getParcelClhData()));
-                            mClhThingySoundPower += 10;
-                            clh.setSoundPower(mClhThingySoundPower);
-                            mClhAdvertiser.addAdvPacketToBuffer(clh,true);
+                        /*
+                                String[] phones = {"iPhone1", "iPhone2", "iPhone3"};
+        String[] thingyNumbers = {"25", "25", "25",         "3", "3", "3",          "53", "53", "53",           "8", "8", "8",              "7", "7", "7",              "69", "69", "69"};
+        Integer[] RSSItest = {-65, -68, -24,             -56, -57, -32,             -28, -35, -47,               -43, -64, -77,             -44, -62, -82,              -85, -95, -49};
 
-                            Log.i(LOG_TAG, "Add array:" + Arrays.toString(clh.getParcelClhData()));
-                            Log.i(LOG_TAG, "Array new size:" + mClhAdvertiser.getAdvertiseList().size());
-                        }
+                         */
+                        ClhAdvertisedData data0 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)25, (byte)-65);
+                        ClhAdvertisedData data1 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)3, (byte)-56);
+                        ClhAdvertisedData data2 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)53, (byte)-43);
+
+                        mClhAdvertiser.addAdvPacketToBuffer(data0,true);
+                        mClhAdvertiser.addAdvPacketToBuffer(data1,true);
+                        mClhAdvertiser.addAdvPacketToBuffer(data2,true);
                       }
 
                     mClhAdvertiser.nextAdvertisingPacket(); //start advertising
@@ -677,8 +783,10 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     @Override
     public void onResume() {
         super.onResume();
-        ThingyListenerHelper.registerThingyListener(getContext(), mThingyListener, mDevice);
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mAudioRecordBroadcastReceiver, createAudioRecordIntentFilter(mDevice.getAddress()));
+        if (mDevice != null) {
+            ThingyListenerHelper.registerThingyListener(getContext(), mThingyListener, mDevice);
+            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mAudioRecordBroadcastReceiver, createAudioRecordIntentFilter(mDevice.getAddress()));
+        }
     }
 
     @Override

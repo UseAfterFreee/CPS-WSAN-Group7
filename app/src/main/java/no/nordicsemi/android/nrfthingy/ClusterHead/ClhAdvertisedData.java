@@ -3,20 +3,24 @@ package no.nordicsemi.android.nrfthingy.ClusterHead;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClhAdvertisedData   {
-    private static final int SOURCE_CLH_ID_POS=0;
-    private static final int PACKET_CLH_ID_POS=1;
-    private static final int DEST_CLH_ID_POS=2;
-    private static final int HOP_COUNT_POS=3;
-    private static final int THINGY_ID_POS=4;
-    private static final int THINGY_DATA_TYPE_POS=5;
-    private static final int SOUND_POWER_POSH=6;
-    private static final int SOUND_POWER_POSL=7;
+    private static final int SOURCE_CLH_ID_POS=0;    // NO
+    private static final int PACKET_CLH_ID_POS=1;    // NO
+    private static final int DEST_CLH_ID_POS=2;      // NO
+    private static final int HOP_COUNT_POS=3;        // NO
+    private static final int THINGY_ID_POS=4;        // YES
+    private static final int THINGY_DATA_TYPE_POS=5; // YES
+    private static final int SOUND_POWER_POSH=6;     // YES
+    private static final int SOUND_POWER_POSL=7;     // YES
+    private static final int IS_ACK_PACKET=8;        // NO
+    private static final int ACK_NUMBER=9;           // NO
+    private static final int PACKET_TYPE=10;         // ?
+    private static final int DATA0=11;               // ?
+    private static final int DATA1=12;               // ?
 
-    private static final int CLH_ARRAY_SIZE=SOUND_POWER_POSL+1;
+    private static final int CLH_ARRAY_SIZE=DATA1+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];
 
 
@@ -40,6 +44,7 @@ public class ClhAdvertisedData   {
         if (manufacturerData.valueAt(index)!=null) {
             System.arraycopy(manufacturerData.valueAt(index), 0,ClhAdvData,PACKET_CLH_ID_POS + 1, manufacturerData.valueAt(index).length);
         }
+//        Log.d("RECVDATASPEC", manufacturerData.valueAt(index)[ACK_NUMBER] +"");
         /*ClhAdvData[DEST_CLH_ID_POS]=manufacturerData.valueAt(index)[0];
         ClhAdvData[HOP_COUNT_POS]=manufacturerData.valueAt(index)[1];
         ClhAdvData[THINGY_ID_POS]=manufacturerData.valueAt(index)[2];
@@ -84,6 +89,30 @@ public class ClhAdvertisedData   {
         ClhAdvData[THINGY_DATA_TYPE_POS] = (byte)(typeData & 0x00FF);
     }
 
+    public void setIsAckPacket(boolean isAck)
+    {
+        ClhAdvData[IS_ACK_PACKET] = isAck ? (byte)1 : (byte)0;
+    }
+
+    public void setAckNumber(byte num)
+    {
+        ClhAdvData[ACK_NUMBER] = num;
+    }
+    public void setPacketType(byte type)
+    {
+        ClhAdvData[PACKET_TYPE] = type;
+    }
+
+    public void setData0(byte data0)
+    {
+        ClhAdvData[DATA0] = data0;
+    }
+
+    public void setData1(byte data1)
+    {
+        ClhAdvData[DATA1] = data1;
+    }
+
     public byte[] getParcelClhData()
     {
         return ClhAdvData;
@@ -115,6 +144,29 @@ public class ClhAdvertisedData   {
     public int getSoundPower()
     {
         return (ClhAdvData[SOUND_POWER_POSH]<<8)+((int)(ClhAdvData[SOUND_POWER_POSL])&0x00FF);
+    }
+    public boolean isAckPacket()
+    {
+        return ClhAdvData[IS_ACK_PACKET] == (byte)1;
+    }
+
+    public byte getAckNumber()
+    {
+        return ClhAdvData[ACK_NUMBER];
+    }
+    public byte getPacketType()
+    {
+        return ClhAdvData[PACKET_TYPE];
+    }
+
+    public byte getData0()
+    {
+        return ClhAdvData[DATA0];
+    }
+
+    public byte getData1()
+    {
+        return ClhAdvData[DATA1];
     }
 
 }
