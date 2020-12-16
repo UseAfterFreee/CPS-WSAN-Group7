@@ -611,6 +611,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     mAdvertiseButton.setText("Stop");
                     mClhIDInput.setEnabled(false);
 
+                    onCreateScanner();
                     startScan();
 
                     mClh.clearClhAdvList(); //empty list before starting
@@ -687,6 +688,10 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     // LIST WITH ALL KNOWN THINGY'S
     List<String> knownMAC = new ArrayList<String>();
 
+    private void onCreateScanner() {
+        mAdapter = new DeviceListAdapter();
+    }
+
     private void startScan() {
         Log.d(TAGY, "Starting Scan");
 
@@ -701,9 +706,9 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
             return;
         }
-
-        mAdapter.clearDevices();
-        troubleshootView.setVisibility(View.VISIBLE);
+        if(mAdapter.isEmpty()) {
+            mAdapter.clearDevices();
+        }
 
         final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
         final ScanSettings settings = new ScanSettings.Builder()
@@ -725,6 +730,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
 
     private void stopScan() {
+        Log.d(TAGY, "Stopping Scan");
         if (mIsScanning) {
             final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
             scanner.stopScan(scanCallback);
