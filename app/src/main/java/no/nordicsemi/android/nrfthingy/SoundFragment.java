@@ -608,6 +608,12 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                                     }
                                 }
                             }
+                            if (procList.get(0).getPacketType() == 2 && mClhID == 0) // sound packet
+                            {
+                                byte id = procList.get(0).getThingyId();
+
+                                mClhLog.append("THINGY " + id + " Has detected a clap.");
+                            }
 
                             receivedPackets.add(procList.get(0).getAckNumber());
                             if (receivedPackets.size() > 100)
