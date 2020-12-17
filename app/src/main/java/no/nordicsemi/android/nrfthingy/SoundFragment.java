@@ -38,6 +38,7 @@
 
 package no.nordicsemi.android.nrfthingy;
 
+import android.util.Log;
 import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -131,6 +132,8 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
     private ThingySdkManager mThingySdkManager;
     private boolean mStartRecordingAudio = false;
     private boolean mStartPlayingAudio = false;
+
+    Clap clap = new Clap();
 
     private ThingyListener mThingyListener = new ThingyListener() {
         private Handler mHandler = new Handler();
@@ -250,23 +253,28 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                 if (data.length != 0) {
 
 
+
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+
                             mVoiceVisualizer.draw(data);
+
 
                         }
                     });
+                    double maximaal = clap.insert_data(data);
+                    if (maximaal > 0) {
+                        Log.d("Banter", "max = " + Double.toString(maximaal));
+                    }
 
-                    //PSG edit No.1
-                    //audio receive event
-                    if( mStartPlayingAudio = true)
-                         mClhAdvertiser.addAdvSoundData(data);
-//                    mClhAdvertiser.addAdvSoundData();
-                    //End PSG edit No.1
+
 
                 }
             }
+        }
+
+        private void setupLedColor(int ledBlue) {
         }
     };
 

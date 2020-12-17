@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2010 - 2017, Nordic Semiconductor ASA
  * All rights reserved.
@@ -62,6 +63,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.tech.NfcF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -82,9 +84,15 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.io.FileWriter;   // Import the FileWriter class
+import java.io.IOException;  // Import the IOException class to handle errors
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -124,6 +132,8 @@ import no.nordicsemi.android.thingylib.ThingyListenerHelper;
 import no.nordicsemi.android.thingylib.ThingySdkManager;
 import no.nordicsemi.android.thingylib.utils.ThingyUtils;
 
+import static no.nordicsemi.android.nrfthingy.FFT.dft;
+import static no.nordicsemi.android.nrfthingy.FFT.fft;
 import static no.nordicsemi.android.nrfthingy.common.Utils.CLOUD_FRAGMENT;
 import static no.nordicsemi.android.nrfthingy.common.Utils.CURRENT_DEVICE;
 import static no.nordicsemi.android.nrfthingy.common.Utils.ENVIRONMENT_FRAGMENT;
@@ -154,7 +164,6 @@ import static no.nordicsemi.android.nrfthingy.common.Utils.isConnected;
 import static no.nordicsemi.android.nrfthingy.common.Utils.readAddressPayload;
 import static no.nordicsemi.android.nrfthingy.common.Utils.showNfcDisabledWarning;
 import static no.nordicsemi.android.nrfthingy.common.Utils.showToast;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         EnvironmentServiceFragment.EnvironmentServiceListener,
         ConfirmThingyDeletionDialogFragment.ConfirmThingyDeletionListener,
@@ -208,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NFCTagFoundDialogFragment mNfcTagFoundDialogFragment;
 
     private ThingyListener mThingyListener = new ThingyListener() {
+
         @Override
         public void onDeviceConnected(BluetoothDevice device, int connectionState) {
             Log.d("brrrr", "brrrrr");
@@ -363,12 +373,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
 
+
+
+        /* ******************************************************************************************************************************* */
+
+
+
         @Override
         public void onMicrophoneValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte[] data) {
-
         }
     };
-
+/* ********************************************************************************************************************************************* */
     private void updateBatteryLevelVisibility(final int visibility) {
         mBatteryLevel.setVisibility(visibility);
         mBatteryLevelImg.setVisibility(visibility);
