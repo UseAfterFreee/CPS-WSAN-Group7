@@ -19,10 +19,29 @@ public class ClhAdvertisedData   {
     private static final int PACKET_TYPE=10;         // ?
     private static final int DATA0=11;               // ?
     private static final int DATA1=12;               // ?
+    private static final int DATA2=13;               // ?
+    private static final int DATA3=14;               // ?
+    private static final int DATA4=15;               // ?
+    private static final int DATA5=16;               // ?
+    private static final int DATA6=17;               // ?
+    private static final int DATA7=18;               // ?
+    private static final int DATA8=19;               // ?
+    private static final int DATA9=20;               // ?
 
-    private static final int CLH_ARRAY_SIZE=DATA1+1;
+    private static final int[] RSSIIDlocation = new int[]{11, 4, 6, 13, 15, 17, 19};
+    private static final int[] RSSIPowerlocation = new int[]{12, 5, 7, 14, 16, 18, 20};
+    private int RSSIpointer = 1;
+
+
+    private static final int CLH_ARRAY_SIZE=DATA9+1;
     byte[] ClhAdvData=new byte[CLH_ARRAY_SIZE];
 
+    public ClhAdvertisedData()
+    {
+        for (int i = 0; i < 21; ++i) {
+            ClhAdvData[i] = 0;
+        }
+    }
 
     public  void Copy(ClhAdvertisedData newObj) {
         byte[] clhdata=newObj.getParcelClhData();
@@ -167,6 +186,19 @@ public class ClhAdvertisedData   {
     public byte getData1()
     {
         return ClhAdvData[DATA1];
+    }
+
+    public byte getData(int i) {try {return ClhAdvData[i];} catch (Exception e) {return 0;}}
+
+    public void setNewRSSI(byte ID, byte RSSI) {
+        try {
+            ClhAdvData[RSSIIDlocation[RSSIpointer]] = ID;
+            ClhAdvData[RSSIPowerlocation[RSSIpointer]] = RSSI;
+            RSSIpointer++;
+        }
+        catch(Exception ignored) {
+
+        }
     }
 
 }
