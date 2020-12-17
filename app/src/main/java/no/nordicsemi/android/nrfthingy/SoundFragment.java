@@ -269,6 +269,8 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                             knownThingys.get(x).clap.insert_data(data);
                         }
                     }
+
+                    // Loop de loop in de handler scoop, Bram, every 4 seconds
                     double max = 0;
                     ThingyBLDev theThingy = new ThingyBLDev();
                     for (int x = 0 ; x < knownThingys.size(); x++) {
@@ -280,7 +282,11 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     if (max != 0) {
                         BluetoothDevice ledDev = theThingy.bluetoothDevice;
                         mThingySdkManager.setConstantLedMode(ledDev, 255, 0, 0);
+                        ClhAdvertisedData newPackv2 = createNewPacket((byte)0, (byte)0, (byte)0, (byte)theThingy.ID, (byte)2, (byte)1, (byte)1);
+                        startTransmit(newPackv2 );
+                        mClhAdvertiser.addAdvPacketToBuffer(newPackv2 , true);
                     }
+                    // End de loop de loop, delete the handler scoop
                 }
             }
         }
