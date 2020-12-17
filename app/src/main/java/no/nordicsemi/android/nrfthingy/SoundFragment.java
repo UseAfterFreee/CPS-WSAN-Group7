@@ -258,10 +258,13 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
                     //PSG edit No.1
                     //audio receive event
-                    if( mStartPlayingAudio = true)
-                         mClhAdvertiser.addAdvSoundData(data);
+                    if( mStartPlayingAudio = true) {
+                        mClhAdvertiser.addAdvSoundData(data);
 //                    mClhAdvertiser.addAdvSoundData();
-                    //End PSG edit No.1
+                        //End PSG edit No.1
+
+                    }
+
 
                 }
             }

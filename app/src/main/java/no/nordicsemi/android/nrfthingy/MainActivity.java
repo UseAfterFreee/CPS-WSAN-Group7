@@ -217,11 +217,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NFCTagFoundDialogFragment mNfcTagFoundDialogFragment;
 
     private ThingyListener mThingyListener = new ThingyListener() {
-        int count_until_two_seconds = 0;
-        int count_until_signal_full = 0;
-        int n_times_looped = 128*2;
-        int temp_teller = 0;
-        Complex[] Signal = new Complex[256* n_times_looped];
+
         @Override
         public void onDeviceConnected(BluetoothDevice device, int connectionState) {
             final String deviceName = mDatabaseHelper.getDeviceName(device.getAddress());
