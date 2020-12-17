@@ -281,7 +281,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     }
                     if (max != 0) {
                         BluetoothDevice ledDev = theThingy.bluetoothDevice;
-                        mThingySdkManager.setConstantLedMode(ledDev, 255, 0, 0);
+                        mThingySdkManager.setConstantLedMode(ledDev, 0, 255, 0);
                         ClhAdvertisedData newPackv2 = createNewPacket((byte)0, (byte)0, (byte)0, (byte)theThingy.ID, (byte)2, (byte)1, (byte)1);
                         startTransmit(newPackv2 );
                         mClhAdvertiser.addAdvPacketToBuffer(newPackv2 , true);
@@ -612,12 +612,11 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                                         for (int x = 0 ; x < knownThingys.size(); x++) {
                                             if (knownThingys.get(x).ID == ID) {
                                                 dev = knownThingys.get(x).bluetoothDevice;
-
                                             }
                                         }
                                         mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
                                         mThingySdkManager.setSelectedDevice(dev);
-                                        // mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
+                                        mThingySdkManager.setConstantLedMode(dev, 255, 0, 0);
                                         Log.d("YEET", "HAS TO CONNECT TO: " + ID);
                                     }
                                     else
@@ -836,9 +835,9 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
             Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).ID +
                     "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
             BluetoothDevice dev = knownThingys.get(i).bluetoothDevice;
-            mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
-            mThingySdkManager.setSelectedDevice(dev);
-            mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
+//            mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
+//            mThingySdkManager.setSelectedDevice(dev);
+            // mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
 
             //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
             if (isFirst) {
