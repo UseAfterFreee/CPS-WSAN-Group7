@@ -657,9 +657,6 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     mAdvertiseButton.setText("Stop");
                     mClhIDInput.setEnabled(false);
 
-                    onCreateScanner();
-                    startScan();
-
                     mClh.clearClhAdvList(); //empty list before starting
 
                     //startScan();
@@ -689,18 +686,9 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         Integer[] RSSItest = {-65, -68, -24,             -56, -57, -32,             -28, -35, -47,               -43, -64, -77,             -44, -62, -82,              -85, -95, -49};
 
                          */
-                        ClhAdvertisedData data0 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)25, (byte)-65);
-//                        ClhAdvertisedData data1 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)3, (byte)-56);
-//                        ClhAdvertisedData data2 = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)53, (byte)-43);
-                        data0.setNewRSSI((byte)3, (byte)-56);
-                        data0.setNewRSSI((byte)53, (byte)-43);
-                        // TODO: YORAN CODE HERE TO INSERT PROPER ID AND RSSI :)
-                        // TODO: OF ERGENS ANDERS ZIE JE MIJ BOEIEN
-                        startTransmit(data0);
 
-                        mClhAdvertiser.addAdvPacketToBuffer(data0,true);
-//                        mClhAdvertiser.addAdvPacketToBuffer(data1,true);
-//                        mClhAdvertiser.addAdvPacketToBuffer(data2,true);
+                        onCreateScanner();
+                        startScan();
                       }
 
                     mClhAdvertiser.nextAdvertisingPacket(); //start advertising
@@ -792,17 +780,27 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
             scanner.stopScan(scanCallback);
             mIsScanning = false;
         }
-        if(!knownThingys.isEmpty()) {
-            Log.d("scanner", "Found  following thingy's: ");
-            for(int i = 0; i < knownThingys.size(); i++) {
-                Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).bluetoothDevice.getName() +
-                        "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
-            }
-        }
-        else {
-            Log.d("scanner", "Found no thingy's");
-        }
 
+        boolean isFirst = true;
+        ClhAdvertisedData newPack = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)0, (byte)0);
+        for(int i = 0; i < knownThingys.size(); i++)
+        {
+            Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).ID +
+                    "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
+
+            //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
+            if (isFirst) {
+                newPack = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0,
+                        (byte)knownThingys.get(i).ID, (byte)knownThingys.get(i).rssi);
+                isFirst = false;
+                continue;
+            }
+            newPack.setNewRSSI((byte)knownThingys.get(i).ID, (byte) knownThingys.get(i).rssi);
+        }
+        if(!knownThingys.isEmpty()) {
+            startTransmit(newPack);
+            mClhAdvertiser.addAdvPacketToBuffer(newPack, true);
+        }
     }
 
 
@@ -814,14 +812,16 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
-
             mAdapter.update(results);
             for (int i = 0; i < results.size(); i++) {
                 thingyBuf.bluetoothDevice = results.get(i).getDevice();
                 thingyBuf.rssi = results.get(i).getRssi();
+                thingyBuf.ID = Integer.parseInt(thingyBuf.bluetoothDevice.getAddress().substring(15), 16);
+
                 if(!knownThingys.contains(thingyBuf)) {
                     knownThingys.add(thingyBuf);
                 }
+
             }
         }
 
