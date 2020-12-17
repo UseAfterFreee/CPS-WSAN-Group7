@@ -1,8 +1,6 @@
 <component name="libraryTable">
   <library name="Gradle: no.nordicsemi.android.support.v18:scanner:1.4.3@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f1c2ed246c9b22657598500766c2cf39/scanner-1.4.3/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/1e041cb850d9ef4093d6c4c942156a09/jetified-scanner-1.4.3/res" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a434192ee2e159d57bac33371caaa61d/jetified-scanner-1.4.3/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a434192ee2e159d57bac33371caaa61d/jetified-scanner-1.4.3/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/a434192ee2e159d57bac33371caaa61d/jetified-scanner-1.4.3/AndroidManifest.xml" />

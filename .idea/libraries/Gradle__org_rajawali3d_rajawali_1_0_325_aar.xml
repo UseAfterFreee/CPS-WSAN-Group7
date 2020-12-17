@@ -1,12 +1,12 @@
 <component name="libraryTable">
   <library name="Gradle: org.rajawali3d:rajawali:1.0.325@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/ff61847ad150095d112554839ae25863/jetified-rajawali-1.0.325/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/ff61847ad150095d112554839ae25863/jetified-rajawali-1.0.325/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/ff61847ad150095d112554839ae25863/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fae3250852125fd7206e5d1719f121e8/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fae3250852125fd7206e5d1719f121e8/jetified-rajawali-1.0.325/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/fae3250852125fd7206e5d1719f121e8/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ad65c29de537a882377e6ace79d886d/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ad65c29de537a882377e6ace79d886d/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0ad65c29de537a882377e6ace79d886d/jetified-rajawali-1.0.325/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.rajawali3d/rajawali/1.0.325/d40f9cc50f99098387c60b83666ad9ddc705e5b8/rajawali-1.0.325-javadoc.jar!/" />
