@@ -195,6 +195,12 @@
                     android:layout_alignParentRight="true"
                     app:srcCompat="@drawable/ic_add_white"/>
 
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Button" />
+
             </RelativeLayout>
 
             <FrameLayout

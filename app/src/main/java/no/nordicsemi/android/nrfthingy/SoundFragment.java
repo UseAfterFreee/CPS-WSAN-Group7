@@ -98,6 +98,7 @@ import no.nordicsemi.android.nrfthingy.sound.FrequencyModeFragment;
 import no.nordicsemi.android.nrfthingy.sound.PcmModeFragment;
 import no.nordicsemi.android.nrfthingy.sound.SampleModeFragment;
 import no.nordicsemi.android.nrfthingy.sound.ThingyMicrophoneService;
+import no.nordicsemi.android.nrfthingy.thingy.ThingyService;
 import no.nordicsemi.android.nrfthingy.widgets.VoiceVisualizer;
 import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanCallback;
@@ -150,6 +151,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         @Override
         public void onServiceDiscoveryCompleted(BluetoothDevice device) {
+            changeLed(null);
         }
 
         @Override
@@ -581,6 +583,15 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                                     if (RSSI == -1 && ID != 0)
                                     {
                                         // TODO: PETER CONNECT TO THINGY WITH ID ID.
+                                        BluetoothDevice dev = null;
+                                        for (int x = 0 ; x < knownThingys.size(); i++) {
+                                            if (knownThingys.get(x).ID == ID) {
+                                                dev = knownThingys.get(x).bluetoothDevice;
+                                            }
+                                        }
+                                        mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
+                                        mThingySdkManager.setSelectedDevice(dev);
+                                        // mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
                                         Log.d("YEET", "HAS TO CONNECT TO: " + ID);
                                     }
                                     else
@@ -771,6 +782,11 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         }, SCAN_DURATION);
     }
 
+    private void changeLed(View view) {
+        BluetoothDevice dev = knownThingys.get(0).bluetoothDevice;
+        mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
+    }
+
 
     private void stopScan() {
         Log.d(TAGY, "Stopping Scan");
@@ -780,13 +796,6 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
             scanner.stopScan(scanCallback);
             mIsScanning = false;
         }
-<<<<<<< HEAD
-        if(!knownThingys.isEmpty()) {
-            Log.d("scanner", "Found  following thingy's: ");
-            for(int i = 0; i < knownThingys.size(); i++) {
-                Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).ID +
-                        "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
-=======
 
         boolean isFirst = true;
         ClhAdvertisedData newPack = createNewPacket(mClhDestID, (byte)mClhThingySoundPower, mClhThingyType, mClhThingyID, (byte)0, (byte)0, (byte)0);
@@ -794,6 +803,10 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         {
             Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).ID +
                     "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
+            BluetoothDevice dev = knownThingys.get(i).bluetoothDevice;
+            mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
+            mThingySdkManager.setSelectedDevice(dev);
+            mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
 
             //byte dest, byte soundPow, byte thingytype, byte thingyid, byte packetType, byte data0, byte data1
             if (isFirst) {
@@ -801,7 +814,6 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                         (byte)knownThingys.get(i).ID, (byte)knownThingys.get(i).rssi);
                 isFirst = false;
                 continue;
->>>>>>> 5469ff3d00205032e02157f2f02ada73c8f2c49d
             }
             newPack.setNewRSSI((byte)knownThingys.get(i).ID, (byte) knownThingys.get(i).rssi);
         }

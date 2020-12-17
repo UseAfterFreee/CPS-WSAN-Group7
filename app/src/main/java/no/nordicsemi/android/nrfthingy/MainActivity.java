@@ -210,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ThingyListener mThingyListener = new ThingyListener() {
         @Override
         public void onDeviceConnected(BluetoothDevice device, int connectionState) {
+            Log.d("brrrr", "brrrrr");
             final String deviceName = mDatabaseHelper.getDeviceName(device.getAddress());
             updateProgressDialogState(getString(R.string.state_discovering_services, deviceName));
             invalidateOptionsMenu();
@@ -234,7 +235,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onServiceDiscoveryCompleted(BluetoothDevice device) {
             updateBatteryLevelVisibility(View.VISIBLE);
             onServiceDiscoveryCompletion(device);
-            checkForFwUpdates();
+            // checkForFwUpdates();
+            Log.d("brrrr", "brrrrr2");
+
         }
 
         @Override
