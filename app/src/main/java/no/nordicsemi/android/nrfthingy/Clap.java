@@ -1,7 +1,5 @@
 package no.nordicsemi.android.nrfthingy;
-
 import android.os.Environment;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,13 +13,16 @@ public class Clap {
     private int count_until_two_seconds;
     private int count_until_signal_full;
     private final int n_times_looped = 128*2;
+    private double return_value;
     Complex[] Signal = new Complex[256* n_times_looped];
+
     public Clap(){
+        return_value = 0.0;
         count_until_two_seconds = 0;
         count_until_signal_full = 0;
     }
-    public double calculate_max(byte[] data) {
 
+    public double insert_data(byte[] data){
 
         StringBuilder sb = new StringBuilder();
 
@@ -45,8 +46,14 @@ public class Clap {
                 count_until_signal_full = count_until_signal_full + 1;
             }
         }
-
         count_until_two_seconds = count_until_two_seconds + 1;
+        return calculate_max();
+
+
+
+    }
+    public double calculate_max() {
+
 
         if (count_until_two_seconds > n_times_looped) {
 
@@ -56,8 +63,6 @@ public class Clap {
             for (int i = 0; i < fft_relevant.length; i++) {
                 double temp_complex = fft_relevant[i].re();
                 fft_real[i] = temp_complex;
-                String temp_decimal_string = Double.toString(temp_complex);
-                sb.append("," + temp_decimal_string);
             }
 
 
@@ -80,50 +85,20 @@ public class Clap {
             }
             Log.d("Banter", Integer.toString(max_i));
             double mean = (sum / total);
-            for (int i = 4000; i < 8000; i++) {
-                if (fft_real[i] == max) {
+                if (max_i < 8000 && max_i > 4000) {
                     Log.d("Banter", "you clapped");
                 }
                 else {
                     max = 0;
                 }
-            }
 
-
-            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File file = new File(path, "Signal_data.csv");
-            FileOutputStream stream = null;
-            Log.d("Banter", "start writing");
-
-
-            try {
-                stream = new FileOutputStream(file);
-                stream.write(sb.toString().getBytes());
-                stream.write("\n".getBytes());
-                stream.write("\n".getBytes());
-                stream.close();
-                Log.d("Banter", "writing completed");
-
-                //stream.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                stream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return max;
-
-
+            return_value = max;
         }
 
-            return 0.0;
+        return return_value;
 
     }
+
 
 }
 

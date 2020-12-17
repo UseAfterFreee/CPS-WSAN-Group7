@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/cyber-wsan.iml" filepath="$PROJECT_DIR$/.idea/cyber-wsan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/cyber-wsan.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/cyber-wsan.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/thingylib/cyber-wsan.thingylib.iml" filepath="$PROJECT_DIR$/.idea/modules/thingylib/cyber-wsan.thingylib.iml" />
     </modules>
   </component>
 </project>
