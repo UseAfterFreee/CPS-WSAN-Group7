@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: org.rajawali3d:rajawali:1.0.325@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/c67131f6a26be963f9f6eedfee3f9cf6/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/c67131f6a26be963f9f6eedfee3f9cf6/jetified-rajawali-1.0.325/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/c67131f6a26be963f9f6eedfee3f9cf6/jetified-rajawali-1.0.325/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.rajawali3d/rajawali/1.0.325/d40f9cc50f99098387c60b83666ad9ddc705e5b8/rajawali-1.0.325-javadoc.jar!/" />

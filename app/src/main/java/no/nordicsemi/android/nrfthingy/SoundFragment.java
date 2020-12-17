@@ -743,7 +743,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
         if(!knownThingys.isEmpty()) {
             Log.d("scanner", "Found  following thingy's: ");
             for(int i = 0; i < knownThingys.size(); i++) {
-                Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).bluetoothDevice.getName() +
+                Log.d("scanner", "Found a thingy, ID = " + knownThingys.get(i).ID +
                         "MAC = " + knownThingys.get(i).bluetoothDevice.getAddress() + " RSSI = " + knownThingys.get(i).rssi);
             }
         }
@@ -762,14 +762,16 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
         @Override
         public void onBatchScanResults(final List<ScanResult> results) {
-
             mAdapter.update(results);
             for (int i = 0; i < results.size(); i++) {
                 thingyBuf.bluetoothDevice = results.get(i).getDevice();
                 thingyBuf.rssi = results.get(i).getRssi();
+                thingyBuf.ID = Integer.parseInt(thingyBuf.bluetoothDevice.getAddress().substring(15), 16);
+
                 if(!knownThingys.contains(thingyBuf)) {
                     knownThingys.add(thingyBuf);
                 }
+
             }
         }
 
