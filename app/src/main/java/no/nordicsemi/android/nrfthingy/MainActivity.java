@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2010 - 2017, Nordic Semiconductor ASA
  * All rights reserved.
@@ -62,6 +63,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.tech.NfcF;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -82,9 +84,15 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.io.FileWriter;   // Import the FileWriter class
+import java.io.IOException;  // Import the IOException class to handle errors
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -124,6 +132,8 @@ import no.nordicsemi.android.thingylib.ThingyListenerHelper;
 import no.nordicsemi.android.thingylib.ThingySdkManager;
 import no.nordicsemi.android.thingylib.utils.ThingyUtils;
 
+import static no.nordicsemi.android.nrfthingy.FFT.dft;
+import static no.nordicsemi.android.nrfthingy.FFT.fft;
 import static no.nordicsemi.android.nrfthingy.common.Utils.CLOUD_FRAGMENT;
 import static no.nordicsemi.android.nrfthingy.common.Utils.CURRENT_DEVICE;
 import static no.nordicsemi.android.nrfthingy.common.Utils.ENVIRONMENT_FRAGMENT;
@@ -154,7 +164,6 @@ import static no.nordicsemi.android.nrfthingy.common.Utils.isConnected;
 import static no.nordicsemi.android.nrfthingy.common.Utils.readAddressPayload;
 import static no.nordicsemi.android.nrfthingy.common.Utils.showNfcDisabledWarning;
 import static no.nordicsemi.android.nrfthingy.common.Utils.showToast;
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         EnvironmentServiceFragment.EnvironmentServiceListener,
         ConfirmThingyDeletionDialogFragment.ConfirmThingyDeletionListener,
@@ -208,6 +217,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NFCTagFoundDialogFragment mNfcTagFoundDialogFragment;
 
     private ThingyListener mThingyListener = new ThingyListener() {
+        int count_until_two_seconds = 0;
+        int count_until_signal_full = 0;
+        int n_times_looped = 128*2;
+        int temp_teller = 0;
+        Complex[] Signal = new Complex[256* n_times_looped];
         @Override
         public void onDeviceConnected(BluetoothDevice device, int connectionState) {
             final String deviceName = mDatabaseHelper.getDeviceName(device.getAddress());
@@ -360,12 +374,215 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
 
+
+
+        /* ******************************************************************************************************************************* */
+
+
+
         @Override
         public void onMicrophoneValueChangedEvent(final BluetoothDevice bluetoothDevice, final byte[] data) {
+            StringBuilder sb = new StringBuilder();
+
+            int count = 0;
+            String temp = "";
+            int temp_decimal = 0;
+            for (byte b : data) {
+                if (count == 0) {
+                    count = 1;
+                    temp_decimal = b;
+                } else {
+                    count = 0;
+                    int x = b;
+                    x <<= 8;
+                    temp_decimal |= x;
+
+
+                    if (count_until_signal_full < 256 * n_times_looped) {
+                        //Signal[count_until_signal_full] = Double.valueOf (temp_decimal);
+                        Signal[count_until_signal_full] = new Complex(Double.valueOf (temp_decimal),0);
+                    }
+
+
+                    count_until_signal_full = count_until_signal_full + 1;
+
+//                    String temp_decimal_string = Integer.toString(temp_decimal);
+//                    sb.append(temp_decimal_string + ",");
+
+                }
+            }
+
+            count_until_two_seconds = count_until_two_seconds + 1;
+            if (count_until_two_seconds > n_times_looped) {
+
+/*
+                //Deleting 0-data in measurements
+                for (int i = 1; i<Signal.length; i++){
+                    if (Signal[i].re()<20000) {
+                        int ii = 1;
+                        //int teller = 0;
+                        if (i +ii < Signal.length) {
+                            while (Signal[i + ii].re() < 20000) {
+                                ii = ii + 1;
+                            }
+                       }
+                        for (int iii = 0; iii < ii; iii++) {
+
+                            if (i + iii + 1 < Signal.length) {
+                                Signal[i + iii] = new Complex((Signal[i - 1].re() + Signal[i + iii + 1].re()) / 2, 0);
+                            } else{
+                                if (i + iii < Signal.length){
+                                    Signal[i + iii] = new Complex(Signal[i - 1].re(), 0);
+                                }
+                            }
+
+                        }
+                    }
+                }
+                //Getting rid of DC current
+                double sum = 0;
+                for (Complex i : Signal)
+                    sum = sum + i.re();
+                double mean = (sum/Signal.length);
+                for (int i = 0; i<Signal.length; i++)
+                    Signal[i] = new Complex(Signal[i].re()-mean,0);
+
+
+
+                Complex[] fft_Signal = fft(Signal);
+                Complex[] fft_relevant = Arrays.copyOfRange(fft_Signal, 0, fft_Signal.length/2);
+                for (int i = 0; i < fft_relevant.length; i++) {
+                    Complex temp_complex = fft_relevant[i];
+                    Double hoi = temp_complex.re();
+
+                    String temp_decimal_string = Double.toString(temp_complex.re());
+                    sb.append("," + temp_decimal_string);
+
+                }
+
+             double max = 0;
+                double sum = 0;
+                int total = 0;
+                for (Complex item : Signal) {
+                    Double i = item.re();
+                    if (i > 100) {
+                        if (max < i)
+                            max = i;
+                        sum = sum + i;
+                        total = total + 1;
+                    }
+                }
+                double mean = (sum/total);
+                double threshold = 10000;
+
+                Log.d("Banter", "mean = " +Double.toString(mean) +", max = "+ Double.toString(max));
+
+                boolean lower = false;
+                int frequentie = 16384;
+                int between_clap = 0;
+                int first_clap = 0;
+                for (int i = 0; i < Signal.length; i++) {
+                    if (Signal[i] > 0) {
+                        if (Signal[i] < threshold) {
+                            lower = true;
+                        }
+                        if (lower == true && Signal[i] > threshold) {
+                            if (first_clap > 0) {
+                                between_clap = i - first_clap;
+                                Log.d("Banter", "you clapped again");
+                                i = Signal.length;
+                            }
+                            if (first_clap == 0) {
+                                first_clap = i;
+                                Log.d("Banter", "you clapped");
+                                i = i +1600;
+                            }
+                            lower = false;
+                            }
+                        }
+                    }
+                Log.d("Banter", Integer.toString(between_clap));
+                if (between_clap < frequentie * 2 && between_clap > frequentie / 4){
+                    Log.d("Banter", "Jongeh wat ga jij klappen dan, IK KLAP JOU");
+
+
+                }
+
+                for (int i = 0; i < Signal.length; i++) {
+                 Double temp_complex = Signal[i];
+*/
+                Complex[] fft_Signal = fft(Signal);
+                Complex[] fft_relevant = Arrays.copyOfRange(fft_Signal, 0, fft_Signal.length/2);
+                double[] fft_real = new double[256* fft_relevant.length];
+                for (int i = 0; i < fft_relevant.length; i++) {
+                    double temp_complex = fft_relevant[i].re();
+                    fft_real[i] = temp_complex;
+                    String temp_decimal_string = Double.toString(temp_complex);
+                    sb.append("," + temp_decimal_string);
+                }
+
+
+                count_until_two_seconds = 0;
+                count_until_signal_full = 0;
+
+
+                double max = 0;
+                double sum = 0;
+                double total = 0;
+                int max_i = 0;
+                for (int i = 100; i < fft_real.length; i++) {
+                    if (max < fft_real[i]) {
+                        max = fft_real[i];
+                        max_i = i;
+                    }
+                    sum = sum + fft_real[i];
+                    total = total + 1;
+
+                }
+                Log.d("Banter", Integer.toString(max_i) );
+                double mean = (sum/total);
+                for(int i = 4000; i < 8000 ; i++){
+                    if (fft_real[i] == max)
+                        Log.d("Banter","you clapped");
+                }
+
+                File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File file = new File(path, "Signal_data.csv");
+                FileOutputStream stream = null;
+                Log.d("Banter", "start writing");
+
+
+                try {
+                    stream = new FileOutputStream(file);
+                    stream.write(sb.toString().getBytes());
+                    stream.write("\n".getBytes());
+                    stream.write("\n".getBytes());
+                    stream.close();
+                    Log.d("Banter", "writing completed");
+
+                    //stream.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    stream.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+
+
+
+
+            }
 
         }
     };
-
+/* ********************************************************************************************************************************************* */
     private void updateBatteryLevelVisibility(final int visibility) {
         mBatteryLevel.setVisibility(visibility);
         mBatteryLevelImg.setVisibility(visibility);
