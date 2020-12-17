@@ -6,4 +6,5 @@ public class ThingyBLDev {
     BluetoothDevice bluetoothDevice;
     int rssi = 0;
     int ID = 0;
+    Clap clap = new Clap();
 }

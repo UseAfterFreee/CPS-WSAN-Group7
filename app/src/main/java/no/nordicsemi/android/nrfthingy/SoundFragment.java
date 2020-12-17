@@ -263,14 +263,24 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
                         }
                     });
-                    double maximaal = clap.insert_data(data);
-                    if (maximaal > 0) {
-                        changeLed(null);
-                        Log.d("Banter", "max = " + Double.toString(maximaal));
+                    BluetoothDevice dev = null;
+                    for (int x = 0 ; x < knownThingys.size(); x++) {
+                        if (knownThingys.get(x).bluetoothDevice == bluetoothDevice) {
+                            knownThingys.get(x).clap.insert_data(data);
+                        }
                     }
-
-
-
+                    double max = 0;
+                    ThingyBLDev theThingy = new ThingyBLDev();
+                    for (int x = 0 ; x < knownThingys.size(); x++) {
+                        if (knownThingys.get(x).clap.calculate_max() > max) {
+                            theThingy = knownThingys.get(x);
+                            max = knownThingys.get(x).clap.calculate_max();
+                        }
+                    }
+                    if (max != 0) {
+                        BluetoothDevice ledDev = theThingy.bluetoothDevice;
+                        mThingySdkManager.setConstantLedMode(ledDev, 255, 0, 0);
+                    }
                 }
             }
         }
@@ -593,9 +603,10 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                                     {
                                         // TODO: PETER CONNECT TO THINGY WITH ID ID.
                                         BluetoothDevice dev = null;
-                                        for (int x = 0 ; x < knownThingys.size(); i++) {
+                                        for (int x = 0 ; x < knownThingys.size(); x++) {
                                             if (knownThingys.get(x).ID == ID) {
                                                 dev = knownThingys.get(x).bluetoothDevice;
+
                                             }
                                         }
                                         mThingySdkManager.connectToThingy(getActivity().getApplicationContext(), dev, ThingyService.class);
