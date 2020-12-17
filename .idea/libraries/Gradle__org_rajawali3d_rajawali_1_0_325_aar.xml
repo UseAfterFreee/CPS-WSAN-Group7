@@ -1,9 +1,21 @@
 <component name="libraryTable">
   <library name="Gradle: org.rajawali3d:rajawali:1.0.325@aar">
     <CLASSES>
+<<<<<<< HEAD
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5aff95949990e857ea8831317ed4c01d/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+=======
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/9c0c143fde5d7585119ec851c27fec58/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/77cebdde878875ebbdd4224cfb8a23a1/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/77cebdde878875ebbdd4224cfb8a23a1/jetified-rajawali-1.0.325/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/77cebdde878875ebbdd4224cfb8a23a1/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dde955bb3a5dd50f995eb36a3e3837a0/jetified-rajawali-1.0.325/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dde955bb3a5dd50f995eb36a3e3837a0/jetified-rajawali-1.0.325/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/dde955bb3a5dd50f995eb36a3e3837a0/jetified-rajawali-1.0.325/AndroidManifest.xml" />
+>>>>>>> SPECIALBRANCH
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.rajawali3d/rajawali/1.0.325/d40f9cc50f99098387c60b83666ad9ddc705e5b8/rajawali-1.0.325-javadoc.jar!/" />
