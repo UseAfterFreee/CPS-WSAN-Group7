@@ -265,6 +265,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
                     });
                     double maximaal = clap.insert_data(data);
                     if (maximaal > 0) {
+                        changeLed(null);
                         Log.d("Banter", "max = " + Double.toString(maximaal));
                     }
 
@@ -792,7 +793,7 @@ public class SoundFragment extends Fragment implements PermissionRationaleDialog
 
     private void changeLed(View view) {
         BluetoothDevice dev = knownThingys.get(0).bluetoothDevice;
-        mThingySdkManager.setOneShotLedMode(dev, ThingyUtils.LED_RED, 255);
+        mThingySdkManager.setConstantLedMode(dev, 255, 0, 0);
     }
 
 
